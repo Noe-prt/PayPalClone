@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1017699560420",
+    "project_id": "clone-1613f",
+    "storage_bucket": "clone-1613f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1017699560420:android:b3a0410aa62cc24fb7f5f1",
+        "android_client_info": {
+          "package_name": "com.example.paypal_clone"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_DPtxHeIMejK8Do_sDKLRudZpus3h1KM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1017699560420:android:ddc2533c42371a6bb7f5f1",
+        "android_client_info": {
+          "package_name": "com.npareti.paypalclone"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_DPtxHeIMejK8Do_sDKLRudZpus3h1KM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
