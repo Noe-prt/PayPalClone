@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:paypal_clone/send_page.dart';
 import 'package:paypal_clone/services/user_wallet.dart';
 import 'package:paypal_clone/signin_page.dart';
+import 'package:paypal_clone/utils/payment_widget.dart';
 import 'search_page.dart';
 import 'dart:async';
 
@@ -22,6 +23,17 @@ class _HomePageState extends State<HomePage> {
   late Timer _refreshTimer;
   List<dynamic> sentEmails = [];
   Duration refreshDuration = const Duration(seconds: 30); // duration until the page refresh
+  List<dynamic> paymentsHistory = [];
+
+  static List<Widget> _widgetOptions = <Widget>[
+
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
 
   @override
@@ -30,6 +42,7 @@ class _HomePageState extends State<HomePage> {
     getUserMoney();
     startRefreshTimer();
     updateSentEmails();
+    loadPaymentsHistory();
   }
 
   void updateSentEmails() async {
@@ -62,9 +75,16 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void loadPaymentsHistory() async {
+    paymentsHistory = await UserWallet().getUserPayments(user?.email);
+    setState(() {
+    });
+  }
+
   Future<void> _handleRefresh() async {
     getUserMoney();
     updateSentEmails();
+    loadPaymentsHistory();
   }
 
   void signOut() {
@@ -85,10 +105,29 @@ class _HomePageState extends State<HomePage> {
           icon: Icon(Icons.logout),
         ),
       ),
-      bottomNavigationBar: BottomAppBar(),
+      bottomNavigationBar: BottomAppBar(
+        child: BottomNavigationBar(
+          items: <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Accueil',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search),
+              label: 'Recherche',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.send),
+              label: 'Envoyer',
+            ),
+          ],
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+        ),
+      ),
       body: RefreshIndicator(
         onRefresh: _handleRefresh,
-        child: ListView(
+        child:ListView(
           children: [
             Padding(
               padding: const EdgeInsets.all(10.0),
@@ -144,42 +183,86 @@ class _HomePageState extends State<HomePage> {
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
             ),
+            sentEmails.isEmpty ?
+            Container(height: 110, child: Center(
+              child: Text("Aucun utilisateur"),
+            ),) :
             Container(
-              height: 110,
+              height: 115,
               child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: sentEmails.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => SendPage(email: sentEmails[index].toString()),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        width: 100,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(50.0),
-                          color: Colors.redAccent,
-                        ),
-                        child: Center(
-                          child: Text(
-                              sentEmails[index].toString().substring(0, 2),
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold
+                  scrollDirection: Axis.horizontal,
+                  itemCount: sentEmails.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SendPage(email: sentEmails[index].toString()),
                             ),
-                          ),
-                        )
+                          );
+                        },
+                        child: Container(
+                            width: 100,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(50.0),
+                              color: Colors.red,
+                            ),
+                            child: Center(
+                              child: Text(
+                                sentEmails[index].toString().substring(0, 2),
+                                style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold
+                                ),
+                              ),
+                            )
+                        ),
                       ),
-                    ),
-                  );
-                }
+                    );
+                  }
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 6),
+              child: Text(
+                "Historique des paiements",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+            ),
+            SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20)
+                  ),
+                  child: paymentsHistory.isEmpty
+                      ? Center(child: Text("Aucun paiement"))
+                      : ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: paymentsHistory.length,
+                    itemBuilder: (context, index) {
+                      return Column(
+                        children: [
+                          PaymentWidget(
+                              email: paymentsHistory[index]["paymentEmail"],
+                              amount: paymentsHistory[index]["paymentAmount"],
+                              date: paymentsHistory[index]["paymentDate"]
+                          ),
+                          Container(
+                            height: 3.0,
+                            color: Color(0xffdedcdc),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
               ),
             ),
             Padding(
